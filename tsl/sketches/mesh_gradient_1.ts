@@ -7,7 +7,7 @@ import { Color, Vector2 } from "three/webgpu";
 import { Fn, screenSize, uniformArray, vec3, int, time, div, max, cos, Loop, PI, sin, vec2, length, float, pow, log, rotate } from "three/tsl";
 
 //array of colors
-const colors = uniformArray([new Color('#eee9df'), new Color('#ffb162'), new Color('#0870f0ff'), new Color('#9bc8f9ff')])
+const colors = uniformArray([new Color('#eee9df'), new Color('#ffb162'), new Color('#0870f0'), new Color('#9bc8f9')])
 
 const colorCount = int(4)
 
