@@ -17,7 +17,9 @@ function FullscreenShader({ shader }: { shader: ShaderFn }) {
   // Build the node material imperatively: colorNode is the shader's Fn output.
   const material = useMemo(() => {
     const m = new THREE.MeshBasicNodeMaterial();
-    m.colorNode = shader();
+    // ShaderFn is intentionally loose (sketches are @ts-nocheck); cast to the
+    // material's own colorNode type so this stays valid across @types/three.
+    m.colorNode = shader() as typeof m.colorNode;
     return m;
   }, [shader]);
 

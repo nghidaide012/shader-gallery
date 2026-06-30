@@ -41,7 +41,7 @@ function Grabber({
         // A 2x2 plane at z=0 exactly fills an ortho(-1,1,1,-1) frustum.
         const geometry = new THREE.PlaneGeometry(2, 2);
         const material = new THREE.MeshBasicNodeMaterial();
-        material.colorNode = shader();
+        material.colorNode = shader() as typeof material.colorNode;
         const mesh = new THREE.Mesh(geometry, material);
         mesh.frustumCulled = false;
         const scene = new THREE.Scene();
