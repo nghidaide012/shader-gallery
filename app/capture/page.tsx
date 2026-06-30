@@ -1,31 +1,45 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { shaders } from "@/lib/shaders";
+import { useEffect, useState } from "react";
+import type { ComponentType } from "react";
+import { shaders, type ShaderEntry } from "@/lib/shaders";
 import { ShaderCapture } from "@/components/shader-capture";
+import { ComponentCapture } from "@/components/component-capture";
 import type { ShaderFn } from "@/tsl/types";
 
-// Loads one shader module client-side, then renders it for capture.
+// Loads one sketch module client-side, then renders the matching capture path:
+// colorNode sketches render their node to a target; component sketches run live
+// and snapshot the scene.
 function Loader({
-  slug,
+  entry,
   onCapture,
 }: {
-  slug: string;
+  entry: ShaderEntry;
   onCapture: (dataUrl: string) => void;
 }) {
-  const [fn, setFn] = useState<ShaderFn | null>(null);
-  const entry = useMemo(() => shaders.find((s) => s.slug === slug)!, [slug]);
+  const [mod, setMod] = useState<{ default: ShaderFn | ComponentType } | null>(
+    null,
+  );
   useEffect(() => {
     let alive = true;
     entry.load().then((m) => {
-      if (alive) setFn(() => m.default);
+      if (alive) setMod(m);
     });
     return () => {
       alive = false;
     };
   }, [entry]);
-  if (!fn) return <p>loading {slug}…</p>;
-  return <ShaderCapture shader={fn} onCapture={onCapture} />;
+
+  if (!mod) return <p>loading {entry.slug}…</p>;
+  if (entry.kind === "component") {
+    return (
+      <ComponentCapture
+        component={mod.default as ComponentType}
+        onCapture={onCapture}
+      />
+    );
+  }
+  return <ShaderCapture shader={mod.default as ShaderFn} onCapture={onCapture} />;
 }
 
 export default function CapturePage() {
@@ -66,7 +80,7 @@ export default function CapturePage() {
       </h1>
       {/* key forces a fresh canvas per shader so each captures cleanly */}
       {current ? (
-        <Loader key={current.slug} slug={current.slug} onCapture={handleCapture} />
+        <Loader key={current.slug} entry={current} onCapture={handleCapture} />
       ) : (
         <p>Done.</p>
       )}

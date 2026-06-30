@@ -2,21 +2,23 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import type { ShaderFn } from "@/tsl/types";
+import type { ComponentType } from "react";
 import { hasGpu } from "@/lib/has-gpu";
 
 // three/webgpu is strictly client-side — never let it run during SSR.
-const ShaderScene = dynamic(
-  () => import("./shader-scene").then((m) => m.ShaderScene),
+const ComponentScene = dynamic(
+  () => import("./component-scene").then((m) => m.ComponentScene),
   { ssr: false },
 );
 
-export function ShaderCanvas({ shader }: { shader: ShaderFn }) {
+export function ComponentShaderCanvas({
+  component,
+}: {
+  component: ComponentType;
+}) {
   const [state, setState] = useState<"checking" | "ok" | "unsupported">(
     "checking",
   );
-
-  // Runs only on the client; "checking" is the stable SSR/first-paint state.
   useEffect(() => setState(hasGpu() ? "ok" : "unsupported"), []);
 
   if (state === "unsupported") {
@@ -33,5 +35,5 @@ export function ShaderCanvas({ shader }: { shader: ShaderFn }) {
     return <div className="h-full w-full bg-black" />;
   }
 
-  return <ShaderScene shader={shader} />;
+  return <ComponentScene component={component} />;
 }
