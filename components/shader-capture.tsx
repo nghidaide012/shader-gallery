@@ -52,7 +52,7 @@ function Grabber({
         const rt = new THREE.RenderTarget(W, H, { depthBuffer: false });
         rt.texture.colorSpace = THREE.SRGBColorSpace; // match on-screen look
         gl.setRenderTarget(rt);
-        await gl.renderAsync(scene, camera);
+        await gl.render(scene, camera);
         const data = (await gl.readRenderTargetPixelsAsync(
           rt,
           0,

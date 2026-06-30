@@ -2,8 +2,12 @@
 
 import * as THREE from "three/webgpu";
 import { useMemo } from "react";
-import { Canvas, extend, type ThreeToJSXElements } from "@react-three/fiber";
-import { ScreenQuad } from "@react-three/drei";
+import {
+  Canvas,
+  extend,
+  useThree,
+  type ThreeToJSXElements,
+} from "@react-three/fiber";
 import type { ShaderFn } from "@/tsl/types";
 
 // Register every three/webgpu class as an R3F JSX element (+ types).
@@ -14,7 +18,10 @@ declare module "@react-three/fiber" {
 extend(THREE as any);
 
 function FullscreenShader({ shader }: { shader: ShaderFn }) {
-  // Build the node material imperatively: colorNode is the shader's Fn output.
+  // A unit plane scaled to the camera's visible size fills the viewport.
+  // (planeGeometry has a `uv` attribute, which the 0.185 TSL pipeline
+  // requires — drei's ScreenQuad has none and renders flat.)
+  const { width, height } = useThree((s) => s.viewport);
   const material = useMemo(() => {
     const m = new THREE.MeshBasicNodeMaterial();
     // ShaderFn is intentionally loose (sketches are @ts-nocheck); cast to the
@@ -23,11 +30,10 @@ function FullscreenShader({ shader }: { shader: ShaderFn }) {
     return m;
   }, [shader]);
 
-  // ScreenQuad draws a fullscreen clip-space triangle; we own the material.
   return (
-    <ScreenQuad>
-      <primitive object={material} attach="material" />
-    </ScreenQuad>
+    <mesh scale={[width, height, 1]} material={material} frustumCulled={false}>
+      <planeGeometry args={[1, 1]} />
+    </mesh>
   );
 }
 
