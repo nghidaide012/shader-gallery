@@ -9,6 +9,7 @@ import {
   type ThreeToJSXElements,
 } from "@react-three/fiber";
 import type { ShaderFn } from "@/tsl/types";
+import { silenceThreeClockWarning } from "@/lib/silence-three-clock-warning";
 
 // Register every three/webgpu class as an R3F JSX element (+ types).
 declare module "@react-three/fiber" {
@@ -16,6 +17,9 @@ declare module "@react-three/fiber" {
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 extend(THREE as any);
+
+// Install before R3F creates its store (and `new THREE.Clock()`) on mount.
+silenceThreeClockWarning();
 
 function FullscreenShader({ shader }: { shader: ShaderFn }) {
   // A unit plane scaled to the camera's visible size fills the viewport.

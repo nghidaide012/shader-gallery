@@ -4,9 +4,13 @@ import * as THREE from "three/webgpu";
 import { useEffect, useRef, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import type { ShaderFn } from "@/tsl/types";
+import { silenceThreeClockWarning } from "@/lib/silence-three-clock-warning";
 
 const W = 1024;
 const H = 768;
+
+// Install before R3F creates its store (and `new THREE.Clock()`) on mount.
+silenceThreeClockWarning();
 
 // Renders the shader into an offscreen render target using R3F's already-
 // initialized WebGPU renderer, then reads the pixels back. A standalone
