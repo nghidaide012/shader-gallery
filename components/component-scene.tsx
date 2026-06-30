@@ -8,6 +8,7 @@ import {
 } from "@react-three/fiber";
 import type { ComponentType } from "react";
 import { silenceThreeClockWarning } from "@/lib/silence-three-clock-warning";
+import { ColorSpaceCorrection } from "@/components/color-space-correction";
 
 // Register every three/webgpu class as an R3F JSX element (+ types).
 declare module "@react-three/fiber" {
@@ -37,6 +38,7 @@ export function ComponentScene({
         return renderer;
       }}
     >
+      <ColorSpaceCorrection />
       <Sketch />
     </Canvas>
   );

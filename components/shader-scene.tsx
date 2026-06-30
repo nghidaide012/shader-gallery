@@ -10,6 +10,7 @@ import {
 } from "@react-three/fiber";
 import type { ShaderFn } from "@/tsl/types";
 import { silenceThreeClockWarning } from "@/lib/silence-three-clock-warning";
+import { ColorSpaceCorrection } from "@/components/color-space-correction";
 
 // Register every three/webgpu class as an R3F JSX element (+ types).
 declare module "@react-three/fiber" {
@@ -54,6 +55,7 @@ export function ShaderScene({ shader }: { shader: ShaderFn }) {
         return renderer;
       }}
     >
+      <ColorSpaceCorrection />
       <FullscreenShader shader={shader} />
     </Canvas>
   );

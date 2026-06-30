@@ -12,7 +12,7 @@ import {
   type CaSketchFraming,
   type CaSketchPropsBase,
   resolveCaFraming,
-} from './ca_common'
+} from '@/lib/ca-common'
 
 // 1D elementary (Wolfram) CA: one storage buffer (space × time), one generation row per tick in compute.
 // Fragment: UV → grid with resolveCaFraming, optional multi-pass composite + masks.
@@ -475,5 +475,3 @@ export const WolframCellularAutomata = ({
 
   return <WebGPUShader colorNode={gpuState.colorNode()} />
 }
-
-export default WolframCellularAutomata

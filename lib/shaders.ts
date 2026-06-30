@@ -24,6 +24,24 @@ export const shaders: ShaderEntry[] = [
     load: () => import("@/tsl/sketches/mesh_gradient_1"),
   },
   {
+    slug: "genuary1",
+    title: "Genuary 1",
+    category: "experimental",
+    load: () => import("@/tsl/sketches/testing"),
+  },
+  {
+    slug: "nebula",
+    title: "Nebula",
+    category: "raymarching",
+    load: () => import("@/tsl/sketches/nebula"),
+  },
+  {
+    slug: "singularity",
+    title: "Singularity",
+    category: "raymarching",
+    load: () => import("@/tsl/sketches/singularity"),
+  },
+  {
     slug: "cellular",
     title: "Cellular",
     category: "automata",
