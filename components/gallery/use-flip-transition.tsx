@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { ShaderEntry } from "@/lib/shaders";
-import { gsap, Flip } from "@/lib/gsap";
+import { gsap } from "@/lib/gsap";
 
 type Source = { el: HTMLElement; posterUrl: string };
 type NavigateFn = (
@@ -52,7 +52,7 @@ export function FlipTransitionProvider({
         gsap.to(overlay, {
           opacity: 0,
           duration: reduced ? 0.2 : 0.5,
-          delay: reduced ? 0.1 : 0.55,
+          delay: reduced ? 0.1 : 0.4,
           ease: "power2.out",
           onComplete: () => overlay.remove(),
         });
@@ -77,32 +77,44 @@ export function FlipTransitionProvider({
         return;
       }
 
-      // Flip morph: place over the tile, capture, expand to fullscreen.
+      // Shared-element morph. The overlay is a full-screen node transformed to
+      // sit exactly over the clicked tile, then animated back to identity.
+      // (Explicit transforms rather than GSAP Flip: Flip's implicit width/height
+      // diffing snapped this body-appended fixed node straight to full-screen
+      // instead of tweening.)
       const r = source.el.getBoundingClientRect();
-      Object.assign(overlay.style, {
-        left: `${r.left}px`,
-        top: `${r.top}px`,
-        width: `${r.width}px`,
-        height: `${r.height}px`,
-        borderRadius: "6px",
-        backgroundImage: `url(${source.posterUrl})`,
-      });
-      const state = Flip.getState(overlay);
       Object.assign(overlay.style, {
         left: "0px",
         top: "0px",
         width: "100vw",
         height: "100vh",
-        borderRadius: "0px",
+        backgroundImage: `url(${source.posterUrl})`,
+        transformOrigin: "top left",
+        willChange: "transform",
       });
-      Flip.from(state, {
-        duration: 0.7,
-        ease: "power3.inOut",
-        onComplete: () => {
-          router.push(url);
-          settle();
+      gsap.fromTo(
+        overlay,
+        {
+          x: r.left,
+          y: r.top,
+          scaleX: r.width / window.innerWidth,
+          scaleY: r.height / window.innerHeight,
+          borderRadius: "6px",
         },
-      });
+        {
+          x: 0,
+          y: 0,
+          scaleX: 1,
+          scaleY: 1,
+          borderRadius: "0px",
+          duration: 0.7,
+          ease: "power3.inOut",
+          onComplete: () => {
+            router.push(url);
+            settle();
+          },
+        },
+      );
     },
     [router, reduced],
   );
