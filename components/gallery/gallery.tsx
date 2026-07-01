@@ -6,7 +6,6 @@ import { HeroShader } from "./hero-shader";
 import { FilterBar } from "./filter-bar";
 import { GalleryGrid } from "./gallery-grid";
 import { CustomCursor } from "./custom-cursor";
-import { FlipTransitionProvider } from "./use-flip-transition";
 
 const CYCLE_MS = 4200;
 const ALL = "all";
@@ -83,8 +82,8 @@ export function Gallery() {
   const activeSlug = hoveredSlug ?? cycleSlug;
 
   return (
-    <FlipTransitionProvider reduced={reduced}>
-      <main className="gallery-root relative min-h-dvh bg-background px-6 pb-24 pt-6 md:px-10">
+    <div className="gallery-root">
+      <main className="relative min-h-dvh bg-background px-6 pb-24 pt-6 md:px-10">
         <header className="mb-6 flex items-baseline justify-between font-mono text-xs uppercase tracking-[0.2em] text-zinc-400">
           <span className="text-zinc-100">TSL / Gallery</span>
           <span>
@@ -111,6 +110,6 @@ export function Gallery() {
 
         {pointerFine && !reduced && <CustomCursor />}
       </main>
-    </FlipTransitionProvider>
+    </div>
   );
 }

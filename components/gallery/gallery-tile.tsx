@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import type { ShaderEntry } from "@/lib/shaders";
 import { gsap } from "@/lib/gsap";
-import { useFlipTransition } from "./use-flip-transition";
 
 export function GalleryTile({
   entry,
@@ -16,11 +16,9 @@ export function GalleryTile({
   onHover: (slug: string | null) => void;
   reduced: boolean;
 }) {
-  const posterRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const xTo = useRef<((v: number) => void) | null>(null);
   const yTo = useRef<((v: number) => void) | null>(null);
-  const { navigate } = useFlipTransition();
 
   const onMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (reduced || !innerRef.current) return;
@@ -46,19 +44,13 @@ export function GalleryTile({
   };
 
   return (
-    <a
+    <Link
       href={`/shader/${entry.slug}`}
       data-tile
       data-reveal
       onMouseEnter={() => onHover(entry.slug)}
       onMouseMove={onMove}
       onMouseLeave={reset}
-      onClick={(ev) =>
-        navigate(ev, entry, {
-          el: posterRef.current!,
-          posterUrl: `/posters/${entry.slug}.png`,
-        })
-      }
       className="group relative block"
     >
       <div ref={innerRef} className="will-change-transform">
@@ -68,7 +60,6 @@ export function GalleryTile({
             className="absolute inset-0 bg-gradient-to-br from-zinc-700 via-zinc-900 to-black"
           />
           <div
-            ref={posterRef}
             aria-hidden
             className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
             style={{ backgroundImage: `url(/posters/${entry.slug}.png)` }}
@@ -84,6 +75,6 @@ export function GalleryTile({
           <span className="opacity-50">{entry.category}</span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }

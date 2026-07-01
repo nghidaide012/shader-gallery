@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ComponentType } from "react";
+import Link from "next/link";
 import { getShader } from "@/lib/shaders";
 import { ShaderCanvas } from "@/components/shader-canvas";
 import { ComponentShaderCanvas } from "@/components/component-shader-canvas";
-import { useFlipTransition } from "./use-flip-transition";
 import { gsap } from "@/lib/gsap";
 import type { ShaderFn } from "@/tsl/types";
 
@@ -20,7 +20,6 @@ export function HeroShader({
   activeSlug: string;
   reduced: boolean;
 }) {
-  const { navigate } = useFlipTransition();
   const [renderSlug, setRenderSlug] = useState(activeSlug);
   const [mod, setMod] = useState<{
     slug: string;
@@ -68,16 +67,9 @@ export function HeroShader({
   const activeEntry = getShader(activeSlug) ?? renderEntry;
 
   return (
-    <a
+    <Link
       href={`/shader/${activeSlug}`}
       data-tile
-      onClick={(ev) =>
-        activeEntry &&
-        navigate(ev, activeEntry, {
-          el: posterRef.current!,
-          posterUrl: `/posters/${activeSlug}.png`,
-        })
-      }
       className="relative mb-10 block h-[54vh] min-h-[420px] w-full overflow-hidden rounded-lg bg-zinc-950"
     >
       <div className="absolute inset-0">
@@ -119,6 +111,6 @@ export function HeroShader({
           {activeEntry?.category} →
         </span>
       </div>
-    </a>
+    </Link>
   );
 }
