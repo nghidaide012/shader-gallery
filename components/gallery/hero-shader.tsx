@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ComponentType } from "react";
-import type { ShaderEntry } from "@/lib/shaders";
 import { getShader } from "@/lib/shaders";
 import { ShaderCanvas } from "@/components/shader-canvas";
 import { ComponentShaderCanvas } from "@/components/component-shader-canvas";
+import { useFlipTransition } from "./use-flip-transition";
 import { gsap } from "@/lib/gsap";
 import type { ShaderFn } from "@/tsl/types";
 
@@ -17,10 +17,10 @@ export function HeroShader({
   activeSlug,
   reduced,
 }: {
-  entries: ShaderEntry[];
   activeSlug: string;
   reduced: boolean;
 }) {
+  const { navigate } = useFlipTransition();
   const [renderSlug, setRenderSlug] = useState(activeSlug);
   const [mod, setMod] = useState<{
     slug: string;
@@ -68,7 +68,18 @@ export function HeroShader({
   const activeEntry = getShader(activeSlug) ?? renderEntry;
 
   return (
-    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-md bg-zinc-950">
+    <a
+      href={`/shader/${activeSlug}`}
+      data-tile
+      onClick={(ev) =>
+        activeEntry &&
+        navigate(ev, activeEntry, {
+          el: posterRef.current!,
+          posterUrl: `/posters/${activeSlug}.png`,
+        })
+      }
+      className="relative mb-10 block h-[54vh] min-h-[420px] w-full overflow-hidden rounded-lg bg-zinc-950"
+    >
       <div className="absolute inset-0">
         {mod &&
           (renderEntry?.kind === "component" ? (
@@ -88,10 +99,26 @@ export function HeroShader({
         style={{ backgroundImage: `url(/posters/${activeSlug}.png)` }}
       />
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between p-4 font-mono text-xs uppercase tracking-widest text-white mix-blend-difference">
-        <span>{activeEntry?.title}</span>
-        <span className="opacity-60">{activeEntry?.category}</span>
+      {/* Legibility scrim under the title. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/20 to-transparent"
+      />
+
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-6 md:p-8">
+        <div>
+          <div className="mb-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.25em] text-white/70">
+            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+            live preview
+          </div>
+          <h2 className="font-mono text-4xl font-semibold uppercase leading-none tracking-tight text-white md:text-6xl lg:text-7xl">
+            {activeEntry?.title}
+          </h2>
+        </div>
+        <span className="hidden font-mono text-xs uppercase tracking-widest text-white/70 sm:block">
+          {activeEntry?.category} →
+        </span>
       </div>
-    </div>
+    </a>
   );
 }

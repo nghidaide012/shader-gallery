@@ -57,14 +57,14 @@ export function FlipTransitionProvider({
           onComplete: () => overlay.remove(),
         });
 
-      if (reduced || !source) {
+      // No source element (rare) → a plain crossfade cover.
+      if (!source) {
         Object.assign(overlay.style, {
           inset: "0px",
           width: "100vw",
           height: "100vh",
           opacity: "0",
         });
-        if (source) overlay.style.backgroundImage = `url(${source.posterUrl})`;
         gsap.to(overlay, {
           opacity: 1,
           duration: reduced ? 0.15 : 0.35,
@@ -77,11 +77,12 @@ export function FlipTransitionProvider({
         return;
       }
 
-      // Shared-element morph. The overlay is a full-screen node transformed to
-      // sit exactly over the clicked tile, then animated back to identity.
-      // (Explicit transforms rather than GSAP Flip: Flip's implicit width/height
-      // diffing snapped this body-appended fixed node straight to full-screen
-      // instead of tweening.)
+      // Shared-element morph: the overlay is a full-screen node transformed to
+      // sit exactly over the clicked tile, then animated back to identity. It
+      // still runs under reduced-motion, just quicker — the grow IS the
+      // navigation affordance here, not decoration. (Explicit transforms rather
+      // than GSAP Flip: Flip's implicit width/height diffing snapped this
+      // body-appended fixed node straight to full-screen instead of tweening.)
       const r = source.el.getBoundingClientRect();
       Object.assign(overlay.style, {
         left: "0px",
@@ -107,7 +108,7 @@ export function FlipTransitionProvider({
           scaleX: 1,
           scaleY: 1,
           borderRadius: "0px",
-          duration: 0.7,
+          duration: reduced ? 0.4 : 0.7,
           ease: "power3.inOut",
           onComplete: () => {
             router.push(url);
