@@ -47,7 +47,9 @@ function Grabber({
     const timer = setTimeout(async () => {
       try {
         const rt = new THREE.RenderTarget(W, H, { depthBuffer: false });
-        rt.texture.colorSpace = THREE.SRGBColorSpace;
+        // Linear to match the live pipeline (outputColorSpace = LinearSRGB,
+        // NoToneMapping); an sRGB target would encode and wash the poster.
+        rt.texture.colorSpace = THREE.LinearSRGBColorSpace;
         gl.setRenderTarget(rt);
         await gl.render(scene, camera);
         const data = (await gl.readRenderTargetPixelsAsync(

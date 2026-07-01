@@ -54,7 +54,13 @@ function Grabber({
         camera.position.z = 1;
 
         const rt = new THREE.RenderTarget(W, H, { depthBuffer: false });
-        rt.texture.colorSpace = THREE.SRGBColorSpace; // match on-screen look
+        // Match the LIVE pipeline: shader-scene renders with
+        // outputColorSpace = LinearSRGB + NoToneMapping (sketches self-tonemap),
+        // so the on-screen bytes are the raw shader output with NO sRGB encode.
+        // Capturing into an sRGB target would add that encode and lift/wash the
+        // poster relative to the live view — keep the target linear so the PNG
+        // stores the same bytes the live canvas shows.
+        rt.texture.colorSpace = THREE.LinearSRGBColorSpace;
         gl.setRenderTarget(rt);
         await gl.render(scene, camera);
         const data = (await gl.readRenderTargetPixelsAsync(
