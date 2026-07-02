@@ -18,11 +18,15 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* Hide the native cursor for the custom one — only where a fine, hoverable
-   pointer exists. Scoped to the gallery so the shader page is untouched. */
+/* Living Index: dim sibling rows while one is hovered (hover devices only). */
+.index-row {
+  transition: opacity 0.3s ease;
+}
 @media (hover: hover) and (pointer: fine) {
-  .gallery-root,
-  .gallery-root a {
-    cursor: none;
+  .index-list:hover .index-row {
+    opacity: 0.4;
+  }
+  .index-list:hover .index-row:hover {
+    opacity: 1;
   }
 }
