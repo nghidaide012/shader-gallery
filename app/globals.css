@@ -18,15 +18,3 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* Living Index: dim sibling rows while one is hovered (hover devices only). */
-.index-row {
-  transition: opacity 0.3s ease;
-}
-@media (hover: hover) and (pointer: fine) {
-  .index-list:hover .index-row {
-    opacity: 0.4;
-  }
-  .index-list:hover .index-row:hover {
-    opacity: 1;
-  }
-}

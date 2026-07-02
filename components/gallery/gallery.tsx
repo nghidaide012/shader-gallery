@@ -1,18 +1,11 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { shaders } from "@/lib/shaders";
-import { ShaderBackdrop } from "./shader-backdrop";
+import { Flip } from "@/lib/gsap";
 import { FilterLinks } from "./filter-links";
-import { IndexList } from "./index-list";
+import { MosaicGrid } from "./mosaic-grid";
 
-const CYCLE_MS = 4200;
 const ALL = "all";
 
 /** Subscribe to a media query without setState-in-effect (SSR-safe: false). */
@@ -51,75 +44,35 @@ export function Gallery() {
     [category],
   );
 
-  // Backdrop: hovered row wins; otherwise auto-cycle the filtered set.
-  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
-  const [cycleSlug, setCycleSlug] = useState(shaders[0].slug);
+  // Snapshot tile positions before the filter re-renders the wall, so
+  // MosaicGrid can Flip-morph from the old layout to the new one.
+  const flipState = useRef<ReturnType<typeof Flip.getState> | null>(null);
 
-  const hoveredRef = useRef<string | null>(null);
-  const reducedRef = useRef(false);
-  const filteredRef = useRef(filtered);
-  useEffect(() => {
-    hoveredRef.current = hoveredSlug;
-    reducedRef.current = reduced;
-    filteredRef.current = filtered;
-  });
-
-  // Change filter + reset the backdrop to the new set's first item, all in
-  // the event handler (no setState-in-effect).
   function handleCategory(next: string) {
-    const list =
-      next === ALL ? shaders : shaders.filter((s) => s.category === next);
+    if (!reduced && typeof document !== "undefined") {
+      const tiles = document.querySelectorAll("[data-flip-id]");
+      if (tiles.length) flipState.current = Flip.getState(tiles);
+    }
     setCategory(next);
-    setHoveredSlug(null);
-    setCycleSlug(list[0]?.slug ?? shaders[0].slug);
   }
 
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      if (hoveredRef.current || reducedRef.current || document.hidden) return;
-      const list = filteredRef.current;
-      if (list.length < 2) return;
-      setCycleSlug((cur) => {
-        const i = list.findIndex((s) => s.slug === cur);
-        return list[(i + 1) % list.length].slug;
-      });
-    }, CYCLE_MS);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const activeSlug = hoveredSlug ?? cycleSlug;
-
   return (
-    <div className="relative min-h-dvh">
-      <ShaderBackdrop
-        activeSlug={activeSlug}
-        hovered={hoveredSlug !== null}
-        reduced={reduced}
+    <main className="min-h-dvh bg-background px-6 pb-16 pt-6 md:px-10">
+      <header className="flex items-baseline justify-between font-mono text-xs uppercase tracking-[0.2em] text-zinc-400">
+        <span className="text-zinc-100">TSL — Gallery</span>
+        <span>
+          ©2026 · <span className="tabular-nums">{shaders.length}</span> works
+        </span>
+      </header>
+
+      <FilterLinks
+        categories={categories}
+        active={category}
+        counts={counts}
+        onChange={handleCategory}
       />
 
-      <main className="relative z-10 px-6 pb-20 pt-6 md:px-10">
-        <header className="flex items-baseline justify-between font-mono text-xs uppercase tracking-[0.2em] text-white/60">
-          <span className="text-white">TSL — Gallery</span>
-          <span>
-            ©2026 · <span className="tabular-nums">{shaders.length}</span> works
-          </span>
-        </header>
-
-        <FilterLinks
-          categories={categories}
-          active={category}
-          counts={counts}
-          onChange={handleCategory}
-        />
-
-        <IndexList
-          entries={filtered}
-          filterKey={category}
-          activeSlug={activeSlug}
-          onHover={setHoveredSlug}
-          reduced={reduced}
-        />
-      </main>
-    </div>
+      <MosaicGrid entries={filtered} flipState={flipState} reduced={reduced} />
+    </main>
   );
 }
