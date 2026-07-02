@@ -21,7 +21,9 @@ export function MosaicGrid({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // One-time reveal on load.
+  // One-time reveal on load. Cleanup must revert (not kill): `reduced` is
+  // false during hydration and corrects afterwards, re-running this effect —
+  // a killed tween would strand the tiles at the fromTo opacity of 0.
   useEffect(() => {
     if (!rootRef.current || reduced) return;
     const tiles = rootRef.current.querySelectorAll("[data-flip-id]");
@@ -31,7 +33,7 @@ export function MosaicGrid({
       { opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.04 },
     );
     return () => {
-      tween.kill();
+      tween.revert();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduced]);
