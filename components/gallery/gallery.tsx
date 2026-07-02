@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { shaders } from "@/lib/shaders";
-import { HeroShader } from "./hero-shader";
-import { FilterBar } from "./filter-bar";
-import { GalleryGrid } from "./gallery-grid";
-import { CustomCursor } from "./custom-cursor";
+import { ShaderBackdrop } from "./shader-backdrop";
+import { FilterLinks } from "./filter-links";
+import { IndexList } from "./index-list";
 
 const CYCLE_MS = 4200;
 const ALL = "all";
@@ -24,7 +29,6 @@ function useMediaQuery(query: string): boolean {
 }
 
 export function Gallery() {
-  const pointerFine = useMediaQuery("(hover: hover) and (pointer: fine)");
   const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   // Category filter derived from the registry — scales to any shader count.
@@ -40,11 +44,14 @@ export function Gallery() {
 
   const [category, setCategory] = useState(ALL);
   const filtered = useMemo(
-    () => (category === ALL ? shaders : shaders.filter((s) => s.category === category)),
+    () =>
+      category === ALL
+        ? shaders
+        : shaders.filter((s) => s.category === category),
     [category],
   );
 
-  // Hero preview: hovered tile wins; otherwise auto-cycle the filtered set.
+  // Backdrop: hovered row wins; otherwise auto-cycle the filtered set.
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [cycleSlug, setCycleSlug] = useState(shaders[0].slug);
 
@@ -57,10 +64,11 @@ export function Gallery() {
     filteredRef.current = filtered;
   });
 
-  // Change filter + reset the preview to the new set's first item, all in the
-  // event handler (no setState-in-effect).
+  // Change filter + reset the backdrop to the new set's first item, all in
+  // the event handler (no setState-in-effect).
   function handleCategory(next: string) {
-    const list = next === ALL ? shaders : shaders.filter((s) => s.category === next);
+    const list =
+      next === ALL ? shaders : shaders.filter((s) => s.category === next);
     setCategory(next);
     setHoveredSlug(null);
     setCycleSlug(list[0]?.slug ?? shaders[0].slug);
@@ -82,33 +90,35 @@ export function Gallery() {
   const activeSlug = hoveredSlug ?? cycleSlug;
 
   return (
-    <div className="gallery-root">
-      <main className="relative min-h-dvh bg-background px-6 pb-24 pt-6 md:px-10">
-        <header className="mb-6 flex items-baseline justify-between font-mono text-xs uppercase tracking-[0.2em] text-zinc-400">
-          <span className="text-zinc-100">TSL / Gallery</span>
+    <div className="relative min-h-dvh">
+      <ShaderBackdrop
+        activeSlug={activeSlug}
+        hovered={hoveredSlug !== null}
+        reduced={reduced}
+      />
+
+      <main className="relative z-10 px-6 pb-20 pt-6 md:px-10">
+        <header className="flex items-baseline justify-between font-mono text-xs uppercase tracking-[0.2em] text-white/60">
+          <span className="text-white">TSL — Gallery</span>
           <span>
             ©2026 · <span className="tabular-nums">{shaders.length}</span> works
           </span>
         </header>
 
-        {/* Full-width live hero doubling as masthead + hover preview. */}
-        <HeroShader activeSlug={activeSlug} reduced={reduced} />
-
-        <FilterBar
+        <FilterLinks
           categories={categories}
           active={category}
           counts={counts}
           onChange={handleCategory}
         />
 
-        <GalleryGrid
+        <IndexList
           entries={filtered}
           filterKey={category}
+          activeSlug={activeSlug}
           onHover={setHoveredSlug}
           reduced={reduced}
         />
-
-        {pointerFine && !reduced && <CustomCursor />}
       </main>
     </div>
   );
